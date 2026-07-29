@@ -6,7 +6,6 @@ import time
 import logging
 
 # --- Logging Configuration ---
-# This saves logs to a file AND prints them to your terminal
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -15,7 +14,6 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-# -----------------------------
 
 app = FastAPI(title="Agentic RAG Backend")
 
@@ -35,32 +33,55 @@ def health_check():
     logging.info("Health check endpoint pinged.")
     return {"status": "healthy"}
 
+
+# ---------------------------------------------------------
+# NEW FUNCTION: The Query Rewriter (Month 3 Task)
+# Notice how this sits OUTSIDE and ABOVE the chat endpoint!
+# ---------------------------------------------------------
+def rewrite_query(current_query: str, history: List[dict]) -> str:
+    """Analyzes history and rewrites query for the retrieval engine."""
+    if not history:
+        return current_query
+        
+    logging.info(f"Original Query: {current_query}")
+    rewritten = f"[Rewritten based on history] {current_query}"
+    logging.info(f"Rewritten Query: {rewritten}")
+    
+    return rewritten
+
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
     session_id = request.session_id
-    start_time = time.time()  # Start the stopwatch
+    start_time = time.time()
     
     logging.info(f"Incoming request | Session: {session_id} | Query: '{request.query}'")
     
     try:
+        # 1. Initialize or fetch history
         if session_id not in sessions_db:
             sessions_db[session_id] = []
-            
         history = sessions_db[session_id]
+        
+        # ---------------------------------------------------------
+        # NEW LOGIC: We call the rewriter right here!
+        # ---------------------------------------------------------
+        search_query = rewrite_query(request.query, history)
         
         # Simulate AI processing time
         time.sleep(1)
         
+        # We now use the 'search_query' in our mock answer
         history_length = len(history)
-        mock_answer = f"Mock Answer. (Session '{session_id}' has {history_length} past messages)."
+        mock_answer = f"Mock Answer based on search: '{search_query}'. (Session '{session_id}' has {history_length} past messages)."
         
+        # Update history
         history.append({"role": "user", "content": request.query})
         history.append({"role": "assistant", "content": mock_answer})
         
         if len(history) > MAX_HISTORY_MESSAGES:
             sessions_db[session_id] = history[-MAX_HISTORY_MESSAGES:]
             
-        # Calculate exactly how long the request took
         process_time = time.time() - start_time
         logging.info(f"Success | Session: {session_id} | Latency: {process_time:.4f} seconds")
         
@@ -73,6 +94,5 @@ def chat(request: ChatRequest):
         
     except Exception as e:
         process_time = time.time() - start_time
-        # Log the exact error so you don't have to guess why it crashed
         logging.error(f"Failed | Session: {session_id} | Error: {str(e)} | Latency: {process_time:.4f} seconds")
         raise HTTPException(status_code=500, detail="Internal Server Error")
