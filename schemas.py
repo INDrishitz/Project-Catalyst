@@ -11,3 +11,12 @@ class ChatResponse(BaseModel):
     citations: List[str]
     sources: List[str]
     faithfulness_score: float
+
+# --- Add this to the bottom of schemas.py ---
+
+class MetricsResponse(BaseModel):
+    """Format guaranteed to Person D for the Observability Dashboard"""
+    total_queries: int
+    average_faithfulness: float
+    average_retrieval_precision: float
+    system_uptime_seconds: float

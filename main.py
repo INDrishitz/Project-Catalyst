@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from schemas import ChatRequest, ChatResponse, MetricsResponse
 from fastapi.middleware.cors import CORSMiddleware
 from schemas import ChatRequest, ChatResponse
 from typing import Dict, List
@@ -27,12 +28,31 @@ app.add_middleware(
 
 sessions_db: Dict[str, List[dict]] = {}
 MAX_HISTORY_MESSAGES = 6
+SERVER_START_TIME = time.time()  # New variable to track uptime
 
 @app.get("/health")
 def health_check():
     logging.info("Health check endpoint pinged.")
     return {"status": "healthy"}
 
+
+@app.get("/metrics", response_model=MetricsResponse)
+def get_metrics():
+    """
+    Month 4/6 Task: Exposes evaluation metrics for the frontend dashboard.
+    Currently returns mock RAGAS scores until Person B integrates real evals.
+    """
+    uptime = time.time() - SERVER_START_TIME
+    
+    logging.info("Metrics endpoint pinged by frontend dashboard.")
+    
+    # Returning mock data representing Person B's future evaluation results
+    return MetricsResponse(
+        total_queries=150,
+        average_faithfulness=0.92,
+        average_retrieval_precision=0.88,
+        system_uptime_seconds=round(uptime, 2)
+    )
 
 # ---------------------------------------------------------
 # NEW FUNCTION: The Query Rewriter (Month 3 Task)
