@@ -1,2 +1,1 @@
-There is no single "best" storyline, because great plots depend on compelling characters, meaningful conflict, and an emotional payoff that resonates with the audience.
-However, literary critics and storytellers often point to universal narrative archetypes and classic structures as the most enduring and effective frameworks for a great plot. 
+The Agentic RAG system was deployed on AWS
