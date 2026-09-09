@@ -1,8 +1,19 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from schemas import ChatRequest, ChatResponse, SourceChunk
 from vector_store import retrieve, ingest_chunks
 
 app = FastAPI(title="RAG Platform API")
+
+# --- ADD THIS BLOCK ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], # Your React frontend URL
+    allow_credentials=True,
+    allow_methods=["*"], # Allows GET, POST, OPTIONS, etc.
+    allow_headers=["*"],
+)
+# ----------------------
 
 @app.post("/chat", response_model=ChatResponse)
 def chat_endpoint(request: ChatRequest):
