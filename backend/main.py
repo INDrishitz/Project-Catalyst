@@ -8,9 +8,9 @@ app = FastAPI(title="RAG Platform API")
 # --- ADD THIS BLOCK ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], # Your React frontend URL
+    allow_origins=["http://localhost:5173", "http://localhost:3000"], 
     allow_credentials=True,
-    allow_methods=["*"], # Allows GET, POST, OPTIONS, etc.
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 # ----------------------
