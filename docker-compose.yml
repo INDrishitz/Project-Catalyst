@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+    ports:
+      - "8000:8000"
+    container_name: rag-backend
+
+  frontend:
+    build: 
+      context: ./frontend
+    ports:
+      - "3000:80"  # This is the critical missing piece!
+    container_name: rag-frontend
+    depends_on:
+      - backend
